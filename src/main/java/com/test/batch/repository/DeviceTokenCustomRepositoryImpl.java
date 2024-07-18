@@ -7,6 +7,7 @@ import com.test.batch.domain.QDeviceToken;
 import com.test.batch.domain.QUser;
 import com.test.batch.dto.DeviceTokenOwner;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class DeviceTokenCustomRepositoryImpl implements DeviceTokenCustomRepository {
