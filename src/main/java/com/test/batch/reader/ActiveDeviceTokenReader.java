@@ -2,12 +2,15 @@ package com.test.batch.reader;
 
 import com.test.batch.dto.DeviceTokenOwner;
 import com.test.batch.repository.DeviceTokenRepository;
+import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
+import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Sort;
@@ -58,5 +61,18 @@ public class ActiveDeviceTokenReader {
             log.error("Error creating jdbcPagingItemReader", e);
             return null;
         }
+    }
+
+    @Bean
+    public JpaPagingItemReader<DeviceTokenOwner> jpaPagingItemReader(EntityManagerFactory em) {
+        return new JpaPagingItemReaderBuilder<DeviceTokenOwner>()
+                .name("jpaPagingItemReader")
+                .entityManagerFactory(em)
+                .queryString("SELECT new com.test.batch.dto.DeviceTokenOwner(u.id, u.name, dt.token) " +
+                        "FROM DeviceToken dt LEFT JOIN User u " +
+                        "ON dt.user.id = u.id WHERE dt.activated = true AND u.accountBookNotify = true" +
+                        "ORDER BY u.id AXC")
+                .pageSize(100)
+                .build();
     }
 }
