@@ -7,8 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
+import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
@@ -73,6 +75,20 @@ public class ActiveDeviceTokenReader {
                         "ON dt.user.id = u.id WHERE dt.activated = true AND u.accountBookNotify = true" +
                         "ORDER BY u.id AXC")
                 .pageSize(100)
+                .build();
+    }
+
+    @Bean
+    public JdbcCursorItemReader<DeviceTokenOwner> jdbcCursorItemReader(DataSource dataSource) {
+        return new JdbcCursorItemReaderBuilder<DeviceTokenOwner>()
+                .name("jdbcCursorItemReader")
+                .dataSource(dataSource)
+                .sql("SELECT u.id, u.name, dt.token FROM device_token dt " +
+                        "LEFT JOIN user u ON dt.user_id = u.id " +
+                        "WHERE dt.activated = true AND u.account_book_notify = true " +
+                        "ORDER BY u.id ASC")
+                .rowMapper(new BeanPropertyRowMapper<>(DeviceTokenOwner.class))
+                .fetchSize(100)
                 .build();
     }
 }
