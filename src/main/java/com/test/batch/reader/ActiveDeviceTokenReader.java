@@ -5,6 +5,7 @@ import com.test.batch.repository.DeviceTokenRepository;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
@@ -29,6 +30,7 @@ public class ActiveDeviceTokenReader {
     private final DeviceTokenRepository deviceTokenRepository;
 
     @Bean
+    @StepScope
     public RepositoryItemReader<DeviceTokenOwner> execute() {
         return new RepositoryItemReaderBuilder<DeviceTokenOwner>()
                 .name("execute")
@@ -42,6 +44,7 @@ public class ActiveDeviceTokenReader {
     }
 
     @Bean
+    @StepScope
     public JdbcPagingItemReader<DeviceTokenOwner> jdbcPagingItemReader(DataSource dataSource) {
         SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
         factoryBean.setDataSource(dataSource);
@@ -66,6 +69,7 @@ public class ActiveDeviceTokenReader {
     }
 
     @Bean
+    @StepScope
     public JpaPagingItemReader<DeviceTokenOwner> jpaPagingItemReader(EntityManagerFactory em) {
         return new JpaPagingItemReaderBuilder<DeviceTokenOwner>()
                 .name("jpaPagingItemReader")
@@ -79,6 +83,7 @@ public class ActiveDeviceTokenReader {
     }
 
     @Bean
+    @StepScope
     public JdbcCursorItemReader<DeviceTokenOwner> jdbcCursorItemReader(DataSource dataSource) {
         return new JdbcCursorItemReaderBuilder<DeviceTokenOwner>()
                 .name("jdbcCursorItemReader")
