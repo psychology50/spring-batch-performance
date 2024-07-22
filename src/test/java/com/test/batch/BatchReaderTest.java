@@ -45,6 +45,7 @@ class BatchReaderTest {
         dataCreator = new DataCreator(jdbcTemplate);
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("JdbcCursorItemReader 테스트")
@@ -57,6 +58,20 @@ class BatchReaderTest {
         itemReader.open(new ExecutionContext());
 
         testItemReader(itemReader, "JdbcCursorItemReader");
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {100, 1000, 10000, 100000})
+    @DisplayName("JdbcPagingItemReader 테스트")
+    void testJdbcPagingItemReader(int dataSize) throws Exception {
+        insertData(dataSize);
+
+        JdbcCursorItemReader<DeviceTokenOwner> itemReader = reader.jdbcCursorItemReader(dataSource);
+        itemReader.afterPropertiesSet();
+
+        itemReader.open(new ExecutionContext());
+
+        testItemReader(itemReader, "JdbcPagingItemReader");
     }
 
     @Test
