@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3300/study?serverTimezone=UTC&characterEncoding=utf8}
+    url: ${DB_URL:jdbc:mysql://localhost:3300/study?serverTimezone=UTC&characterEncoding=utf8&rewriteBatchedStatements=true
     username: ${DB_USER_NAME:root}
     password: ${DB_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -24,13 +24,13 @@ spring:
 logging:
   level:
     ROOT: INFO
-#    org.hibernate: DEBUG
-#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    #    org.hibernate: DEBUG
+    #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.hibernate.sql: debug
     org.hibernate.type: trace
-#    com.zaxxer.hikari.HikariConfig: DEBUG
-#    org.springframework.orm: TRACE
-#    org.springframework.transaction: TRACE
-#    com.zaxxer.hikari: TRACE
+    #    com.zaxxer.hikari.HikariConfig: DEBUG
+    #    org.springframework.orm: TRACE
+    #    org.springframework.transaction: TRACE
+    #    com.zaxxer.hikari: TRACE
     com.mysql.cj.jdbc: TRACE
     org.springframework.jdbc: debug
