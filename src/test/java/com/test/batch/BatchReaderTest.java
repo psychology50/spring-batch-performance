@@ -6,6 +6,8 @@ import com.test.batch.repository.UserRepository;
 import com.test.batch.supporter.DataCreator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.data.RepositoryItemReader;
@@ -14,7 +16,6 @@ import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
 import javax.sql.DataSource;
@@ -44,13 +45,11 @@ class BatchReaderTest {
         dataCreator = new DataCreator(jdbcTemplate);
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("JdbcCursorItemReader 테스트")
-    void testJdbcCursorItemReader() throws Exception {
-        int userCount = 100, deviceTokenCount = userCount * 10;
-        dataCreator.bulkInsertUser(userCount);
-        List<Long> userIds = userRepository.findAllIds();
-        dataCreator.bulkInsertDeviceToken(deviceTokenCount, userIds);
+    void testJdbcCursorItemReader(int dataSize) throws Exception {
+        insertData(dataSize);
 
         JdbcCursorItemReader<DeviceTokenOwner> itemReader = reader.jdbcCursorItemReader(dataSource);
         itemReader.afterPropertiesSet();
@@ -62,14 +61,8 @@ class BatchReaderTest {
 
     @Test
     @Disabled
-    @Transactional
     @DisplayName("RepositoryItemReader 테스트")
     void testRepositoryItemReader() {
-        int userCount = 100, deviceTokenCount = userCount * 10;
-        dataCreator.bulkInsertUser(userCount);
-        List<Long> userIds = userRepository.findAllIds();
-        dataCreator.bulkInsertDeviceToken(deviceTokenCount, userIds);
-
         RepositoryItemReader<DeviceTokenOwner> itemReader = reader.execute();
 
         testItemReader(itemReader, "RepositoryItemReader");
@@ -83,7 +76,6 @@ class BatchReaderTest {
         DeviceTokenOwner item;
         try {
             while ((item = itemReader.read()) != null) {
-                log.info("{}", item);
                 count++;
             }
         } catch (Exception e) {
@@ -98,5 +90,13 @@ class BatchReaderTest {
     void tearDown() {
         dataCreator.bulkDeleteDeviceToken();
         dataCreator.bulkDeleteUser();
+    }
+
+    private void insertData(int dataSize) {
+        int userCount = dataSize, deviceTokenCount = userCount * 10; // 사용자 수, 디바이스 토큰 수(사용자수 10배)
+        dataCreator.bulkInsertUser(userCount);
+        List<Long> userIds = userRepository.findAllIds();
+        dataCreator.bulkInsertDeviceToken(deviceTokenCount, userIds); // 사용자에게 랜덤으로 디바이스 토큰을 부여 (중복 허용)
+        dataCreator = new DataCreator(jdbcTemplate);
     }
 }
