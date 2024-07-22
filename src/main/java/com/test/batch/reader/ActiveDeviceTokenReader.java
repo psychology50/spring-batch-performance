@@ -17,7 +17,6 @@ import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilde
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Sort;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -58,7 +57,11 @@ public class ActiveDeviceTokenReader {
                     .name("jdbcPagingItemReader")
                     .dataSource(dataSource)
                     .fetchSize(100)
-                    .rowMapper(new BeanPropertyRowMapper<>(DeviceTokenOwner.class))
+                    .rowMapper((rs, rowNum) -> new DeviceTokenOwner(
+                            rs.getLong("id"),
+                            rs.getString("name"),
+                            rs.getString("token")
+                    ))
                     .queryProvider(factoryBean.getObject())
                     .pageSize(100)
                     .build();
@@ -92,7 +95,13 @@ public class ActiveDeviceTokenReader {
                         "LEFT JOIN user u ON dt.user_id = u.id " +
                         "WHERE dt.activated = true AND u.account_book_notify = true " +
                         "ORDER BY u.id ASC")
-                .rowMapper(new BeanPropertyRowMapper<>(DeviceTokenOwner.class))
+//                .rowMapper(new BeanPropertyRowMapper<>(DeviceTokenOwner.class))
+//                .beanRowMapper(DeviceTokenOwner.class)
+                .rowMapper((rs, rowNum) -> new DeviceTokenOwner(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getString("token")
+                ))
                 .fetchSize(100)
                 .build();
     }
