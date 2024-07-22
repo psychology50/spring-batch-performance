@@ -5,7 +5,10 @@ import com.test.batch.reader.ActiveDeviceTokenReader;
 import com.test.batch.repository.UserRepository;
 import com.test.batch.supporter.DataCreator;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.batch.item.ExecutionContext;
@@ -74,10 +77,25 @@ class BatchReaderTest {
         testItemReader(itemReader, "JdbcPagingItemReader");
     }
 
-    @Test
     @Disabled
+    @ParameterizedTest
+    @ValueSource(ints = {100, 1000, 10000, 100000})
+    @DisplayName("JpaPagingItemReader 테스트")
+    void testJpaPagingItemReader(int dataSize) {
+        insertData(dataSize);
+
+        JdbcCursorItemReader<DeviceTokenOwner> itemReader = reader.jdbcCursorItemReader(dataSource);
+
+        testItemReader(itemReader, "JpaPagingItemReader");
+    }
+
+    @Disabled
+    @ParameterizedTest
+    @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("RepositoryItemReader 테스트")
-    void testRepositoryItemReader() {
+    void testRepositoryItemReader(int dataSize) {
+        insertData(dataSize);
+
         RepositoryItemReader<DeviceTokenOwner> itemReader = reader.execute();
 
         testItemReader(itemReader, "RepositoryItemReader");
