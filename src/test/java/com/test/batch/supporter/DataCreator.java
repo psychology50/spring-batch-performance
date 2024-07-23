@@ -11,6 +11,7 @@ public class DataCreator {
     private static final String INSERT_USER = "INSERT INTO user (account_book_notify, chat_notify, feed_notify, created_at, updated_at, name, username) VALUES (:accountBookNotify, :chatNotify, :feedNotify, NOW(), NOW(), :name, :username);";
     private static final String INSERT_DEVICE_TOKEN = "INSERT INTO device_token (activated, created_at, updated_at, user_id, token) VALUES (:activated, NOW(), NOW(), :userId, :token);";
     private final NamedParameterJdbcTemplate jdbcTemplate;
+
     public DataCreator(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -47,5 +48,9 @@ public class DataCreator {
 
     public void bulkDeleteDeviceToken() {
         jdbcTemplate.update("DELETE FROM device_token", new MapSqlParameterSource());
+    }
+
+    public void bulkDeleteNotifications() {
+        jdbcTemplate.update("DELETE FROM notification", new MapSqlParameterSource());
     }
 }
