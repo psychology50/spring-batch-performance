@@ -1,5 +1,8 @@
 package com.test.batch.reader;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.test.batch.domain.QDeviceToken;
+import com.test.batch.domain.QUser;
 import com.test.batch.dto.DeviceTokenOwner;
 import com.test.batch.repository.DeviceTokenRepository;
 import jakarta.persistence.EntityManagerFactory;
@@ -27,6 +30,9 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class ActiveDeviceTokenReader {
     private final DeviceTokenRepository deviceTokenRepository;
+    private final JPAQueryFactory queryFactory;
+    private final QUser user = QUser.user;
+    private final QDeviceToken deviceToken = QDeviceToken.deviceToken;
 
     @Bean
     @StepScope
@@ -35,7 +41,7 @@ public class ActiveDeviceTokenReader {
                 .name("execute")
                 .repository(deviceTokenRepository)
                 .methodName("findActivatedDeviceTokenOwners")
-                .pageSize(100)
+                .pageSize(1000)
                 .sorts(new HashMap<>() {{
                     put("id", Sort.Direction.ASC);
                 }})
@@ -56,14 +62,14 @@ public class ActiveDeviceTokenReader {
             return new JdbcPagingItemReaderBuilder<DeviceTokenOwner>()
                     .name("jdbcPagingItemReader")
                     .dataSource(dataSource)
-                    .fetchSize(100)
+                    .fetchSize(1000)
                     .rowMapper((rs, rowNum) -> new DeviceTokenOwner(
                             rs.getLong("id"),
                             rs.getString("name"),
                             rs.getString("token")
                     ))
                     .queryProvider(factoryBean.getObject())
-                    .pageSize(100)
+                    .pageSize(800)
                     .build();
         } catch (Exception e) {
             log.error("Error creating jdbcPagingItemReader", e);
@@ -79,8 +85,23 @@ public class ActiveDeviceTokenReader {
                 .entityManagerFactory(em)
                 .queryString("SELECT new com.test.batch.dto.DeviceTokenOwner(u.id, u.name, dt.token) " +
                         "FROM DeviceToken dt LEFT JOIN User u " +
-                        "ON dt.user.id = u.id WHERE dt.activated = true AND u.accountBookNotify = true" +
-                        "ORDER BY u.id AXC")
+                        "ON dt.user.id = u.id WHERE dt.activated = true AND u.notifySetting.accountBookNotify = true " +
+                        "ORDER BY u.id ASC")
+//                .queryProvider(new JpaQueryDslProvider<>(
+//                        queryFactory
+//                                .select(
+//                                        Projections.constructor(
+//                                                DeviceTokenOwner.class,
+//                                                user.id,
+//                                                user.name,
+//                                                deviceToken.token
+//                                        )
+//                                )
+//                                .from(deviceToken)
+//                                .leftJoin(user).on(deviceToken.user.id.eq(user.id))
+//                                .where(deviceToken.activated.isTrue().and(user.notifySetting.accountBookNotify.isTrue()))
+//                                .orderBy(user.id.asc())
+//                ))
                 .pageSize(100)
                 .build();
     }
@@ -102,7 +123,7 @@ public class ActiveDeviceTokenReader {
                         rs.getString("name"),
                         rs.getString("token")
                 ))
-                .fetchSize(100)
+                .fetchSize(1000)
                 .build();
     }
 }
