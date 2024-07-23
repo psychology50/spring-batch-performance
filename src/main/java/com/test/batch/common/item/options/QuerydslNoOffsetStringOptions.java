@@ -18,6 +18,13 @@ public class QuerydslNoOffsetStringOptions<T> extends QuerydslNoOffsetOptions<T>
         this.field = field;
     }
 
+    public QuerydslNoOffsetStringOptions(@Nonnull StringPath field,
+                                         @Nonnull Expression expression,
+                                         String idName) {
+        super(idName, expression);
+        this.field = null;
+    }
+
     public String getCurrentId() {
         return currentId;
     }

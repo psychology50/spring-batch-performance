@@ -14,10 +14,18 @@ public abstract class QuerydslNoOffsetOptions<T> {
     protected final Expression expression;
     protected Log logger = LogFactory.getLog(getClass());
 
-    public QuerydslNoOffsetOptions(@Nonnull Path field,
-                                   @Nonnull Expression expression) {
+    public QuerydslNoOffsetOptions(@Nonnull Path field, @Nonnull Expression expression) {
         String[] qField = field.toString().split("\\.");
         this.fieldName = qField[qField.length - 1];
+        this.expression = expression;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("fieldName= " + fieldName);
+        }
+    }
+
+    public QuerydslNoOffsetOptions(@Nonnull String dtoField, @Nonnull Expression expression) {
+        this.fieldName = dtoField;
         this.expression = expression;
 
         if (logger.isDebugEnabled()) {

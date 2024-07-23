@@ -19,6 +19,13 @@ public class QuerydslNoOffsetNumberOptions<T, N extends Number & Comparable<?>> 
         this.field = field;
     }
 
+    public QuerydslNoOffsetNumberOptions(@Nonnull NumberPath<N> field,
+                                         @Nonnull Expression expression,
+                                         String idName) {
+        super(idName, expression);
+        this.field = field;
+    }
+
     public N getCurrentId() {
         return currentId;
     }
