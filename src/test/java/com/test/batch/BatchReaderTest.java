@@ -4,6 +4,7 @@ import com.test.batch.dto.DeviceTokenOwner;
 import com.test.batch.reader.ActiveDeviceTokenReader;
 import com.test.batch.repository.UserRepository;
 import com.test.batch.supporter.DataCreator;
+import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,8 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.JdbcPagingItemReader;
+import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +43,8 @@ class BatchReaderTest {
 
     @Autowired
     private DataSource dataSource;
+    @Autowired
+    private EntityManagerFactory entityManagerFactory;
 
     private DataCreator dataCreator;
 
@@ -63,13 +68,14 @@ class BatchReaderTest {
         testItemReader(itemReader, "JdbcCursorItemReader");
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("JdbcPagingItemReader 테스트")
     void testJdbcPagingItemReader(int dataSize) throws Exception {
         insertData(dataSize);
 
-        JdbcCursorItemReader<DeviceTokenOwner> itemReader = reader.jdbcCursorItemReader(dataSource);
+        JdbcPagingItemReader<DeviceTokenOwner> itemReader = reader.jdbcPagingItemReader(dataSource);
         itemReader.afterPropertiesSet();
 
         itemReader.open(new ExecutionContext());
@@ -77,14 +83,14 @@ class BatchReaderTest {
         testItemReader(itemReader, "JdbcPagingItemReader");
     }
 
-    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("JpaPagingItemReader 테스트")
     void testJpaPagingItemReader(int dataSize) {
         insertData(dataSize);
 
-        JdbcCursorItemReader<DeviceTokenOwner> itemReader = reader.jdbcCursorItemReader(dataSource);
+        JpaPagingItemReader<DeviceTokenOwner> itemReader = reader.jpaPagingItemReader(entityManagerFactory);
+        itemReader.open(new ExecutionContext());
 
         testItemReader(itemReader, "JpaPagingItemReader");
     }
