@@ -1,7 +1,6 @@
 package com.test.batch.step;
 
 import com.test.batch.dto.DeviceTokenOwner;
-import com.test.batch.processor.NotificationProcessor;
 import com.test.batch.reader.ActiveDeviceTokenReader;
 import com.test.batch.writer.NotificationWriter;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class SendSpendingNotifyStepConfig {
     private final JobRepository jobRepository;
     private final ActiveDeviceTokenReader reader;
-    private final NotificationProcessor processor;
     private final NotificationWriter writer;
 
     @Bean
@@ -27,7 +25,6 @@ public class SendSpendingNotifyStepConfig {
         return new StepBuilder("sendSpendingNotifyStep", jobRepository)
                 .<DeviceTokenOwner, DeviceTokenOwner>chunk(100, transactionManager)
                 .reader(reader.execute())
-                .processor(processor)
                 .writer(writer)
                 .build();
     }
