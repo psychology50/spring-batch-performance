@@ -70,14 +70,14 @@ public class ActiveDeviceTokenReader {
             return new JdbcPagingItemReaderBuilder<DeviceTokenOwner>()
                     .name("jdbcPagingItemReader")
                     .dataSource(dataSource)
-                    .fetchSize(1000)
+                    .fetchSize(100)
                     .rowMapper((rs, rowNum) -> new DeviceTokenOwner(
                             rs.getLong("id"),
                             rs.getString("name"),
                             rs.getString("token")
                     ))
                     .queryProvider(factoryBean.getObject())
-                    .pageSize(1000)
+                    .pageSize(100)
                     .build();
         } catch (Exception e) {
             log.error("Error creating jdbcPagingItemReader", e);
@@ -138,7 +138,7 @@ public class ActiveDeviceTokenReader {
     @Bean
     @StepScope
     public QuerydslNoOffsetPagingItemReader<DeviceTokenOwner> querydslNoOffsetPagingItemReader() {
-        QuerydslNoOffsetOptions<DeviceTokenOwner> options = new QuerydslNoOffsetNumberOptions<>(user.id, Expression.ASC);
+        QuerydslNoOffsetOptions<DeviceTokenOwner> options = new QuerydslNoOffsetNumberOptions<>(user.id, Expression.ASC, "userId");
 
         return new QuerydslNoOffsetPagingItemReader<>(emf, 1000, options, queryFactory -> queryFactory
                 .select(

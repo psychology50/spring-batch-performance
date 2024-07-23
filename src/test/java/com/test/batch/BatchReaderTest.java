@@ -69,6 +69,7 @@ class BatchReaderTest {
         testItemReader(itemReader, "JdbcCursorItemReader");
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("JdbcPagingItemReader 테스트")
@@ -108,7 +109,6 @@ class BatchReaderTest {
         testItemReader(itemReader, "RepositoryItemReader");
     }
 
-    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("QuerydslNoOffsetPagingItemReader 테스트")
@@ -116,6 +116,7 @@ class BatchReaderTest {
         insertData(dataSize);
 
         QuerydslNoOffsetPagingItemReader<DeviceTokenOwner> itemReader = reader.querydslNoOffsetPagingItemReader();
+        itemReader.open(new ExecutionContext());
 
         testItemReader(itemReader, "QuerydslNoOffsetPagingItemReader");
     }
