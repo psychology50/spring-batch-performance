@@ -1,6 +1,11 @@
 package com.test.batch.reader;
 
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.test.batch.common.item.QuerydslNoOffsetPagingItemReader;
+import com.test.batch.common.item.expression.Expression;
+import com.test.batch.common.item.options.QuerydslNoOffsetNumberOptions;
+import com.test.batch.common.item.options.QuerydslNoOffsetOptions;
 import com.test.batch.domain.QDeviceToken;
 import com.test.batch.domain.QUser;
 import com.test.batch.dto.DeviceTokenOwner;
@@ -31,6 +36,9 @@ import java.util.HashMap;
 public class ActiveDeviceTokenReader {
     private final DeviceTokenRepository deviceTokenRepository;
     private final JPAQueryFactory queryFactory;
+
+    private final EntityManagerFactory emf;
+
     private final QUser user = QUser.user;
     private final QDeviceToken deviceToken = QDeviceToken.deviceToken;
 
@@ -69,7 +77,7 @@ public class ActiveDeviceTokenReader {
                             rs.getString("token")
                     ))
                     .queryProvider(factoryBean.getObject())
-                    .pageSize(800)
+                    .pageSize(1000)
                     .build();
         } catch (Exception e) {
             log.error("Error creating jdbcPagingItemReader", e);
@@ -102,7 +110,7 @@ public class ActiveDeviceTokenReader {
 //                                .where(deviceToken.activated.isTrue().and(user.notifySetting.accountBookNotify.isTrue()))
 //                                .orderBy(user.id.asc())
 //                ))
-                .pageSize(100)
+                .pageSize(3000)
                 .build();
     }
 
@@ -125,5 +133,25 @@ public class ActiveDeviceTokenReader {
                 ))
                 .fetchSize(1000)
                 .build();
+    }
+
+    @Bean
+    @StepScope
+    public QuerydslNoOffsetPagingItemReader<DeviceTokenOwner> querydslNoOffsetPagingItemReader() {
+        QuerydslNoOffsetOptions<DeviceTokenOwner> options = new QuerydslNoOffsetNumberOptions<>(user.id, Expression.ASC);
+
+        return new QuerydslNoOffsetPagingItemReader<>(emf, 1000, options, queryFactory -> queryFactory
+                .select(
+                        Projections.constructor(
+                                DeviceTokenOwner.class,
+                                user.id,
+                                user.name,
+                                deviceToken.token
+                        )
+                )
+                .from(deviceToken)
+                .leftJoin(user).on(deviceToken.user.id.eq(user.id))
+                .where(deviceToken.activated.isTrue().and(user.notifySetting.accountBookNotify.isTrue()))
+        );
     }
 }
