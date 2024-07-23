@@ -1,5 +1,6 @@
 package com.test.batch;
 
+import com.test.batch.common.item.QuerydslNoOffsetPagingItemReader;
 import com.test.batch.dto.DeviceTokenOwner;
 import com.test.batch.reader.ActiveDeviceTokenReader;
 import com.test.batch.repository.UserRepository;
@@ -68,7 +69,6 @@ class BatchReaderTest {
         testItemReader(itemReader, "JdbcCursorItemReader");
     }
 
-    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("JdbcPagingItemReader 테스트")
@@ -83,6 +83,7 @@ class BatchReaderTest {
         testItemReader(itemReader, "JdbcPagingItemReader");
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("JpaPagingItemReader 테스트")
@@ -105,6 +106,18 @@ class BatchReaderTest {
         RepositoryItemReader<DeviceTokenOwner> itemReader = reader.execute();
 
         testItemReader(itemReader, "RepositoryItemReader");
+    }
+
+    @Disabled
+    @ParameterizedTest
+    @ValueSource(ints = {100, 1000, 10000, 100000})
+    @DisplayName("QuerydslNoOffsetPagingItemReader 테스트")
+    void testQuerydslNoOffsetPagingItemReader(int dataSize) {
+        insertData(dataSize);
+
+        QuerydslNoOffsetPagingItemReader<DeviceTokenOwner> itemReader = reader.querydslNoOffsetPagingItemReader();
+
+        testItemReader(itemReader, "QuerydslNoOffsetPagingItemReader");
     }
 
     private void testItemReader(ItemReader<DeviceTokenOwner> itemReader, String readerName) {
