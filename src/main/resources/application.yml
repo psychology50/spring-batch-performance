@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3300/batch_test?serverTimezone=UTC&characterEncoding=utf8&rewriteBatchedStatements=true&postfileSQL=true&logger=Slf4JLogger}
+    url: ${DB_URL:jdbc:mysql://localhost:3300/batch_test?serverTimezone=UTC&characterEncoding=utf8&postfileSQL=true&logger=Slf4JLogger&rewriteBatchedStatements=true}
     username: ${DB_USER_NAME:root}
     password: ${DB_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
