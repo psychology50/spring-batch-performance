@@ -23,8 +23,18 @@ public class SendSpendingNotifyStepConfig {
     @JobScope
     public Step sendSpendingNotifyStep(PlatformTransactionManager transactionManager) {
         return new StepBuilder("sendSpendingNotifyStep", jobRepository)
-                .<DeviceTokenOwner, DeviceTokenOwner>chunk(100, transactionManager)
+                .<DeviceTokenOwner, DeviceTokenOwner>chunk(1000, transactionManager)
                 .reader(reader.execute())
+                .writer(writer)
+                .build();
+    }
+
+    @Bean
+    @JobScope
+    public Step sendSpendingNotifyStepAdvanced(PlatformTransactionManager transactionManager) {
+        return new StepBuilder("sendSpendingNotifyStepAdvanced", jobRepository)
+                .<DeviceTokenOwner, DeviceTokenOwner>chunk(1000, transactionManager)
+                .reader(reader.querydslNoOffsetPagingItemReader())
                 .writer(writer)
                 .build();
     }

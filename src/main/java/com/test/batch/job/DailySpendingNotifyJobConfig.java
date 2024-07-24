@@ -18,9 +18,9 @@ public class DailySpendingNotifyJobConfig {
     @Bean
     public Job dailyNotificationJob(PlatformTransactionManager transactionManager) {
         return new JobBuilder("dailyNotificationJob", jobRepository)
-                .start(sendSpendingNotifyStepConfig.sendSpendingNotifyStep(transactionManager))
+                .start(sendSpendingNotifyStepConfig.sendSpendingNotifyStepAdvanced(transactionManager))
                 .on("FAILED")
-                .stopAndRestart(sendSpendingNotifyStepConfig.sendSpendingNotifyStep(transactionManager))
+                .stopAndRestart(sendSpendingNotifyStepConfig.sendSpendingNotifyStepAdvanced(transactionManager))
                 .on("*")
                 .end()
                 .end()
