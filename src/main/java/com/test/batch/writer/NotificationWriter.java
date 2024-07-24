@@ -6,9 +6,9 @@ import com.test.batch.dto.DeviceTokenOwner;
 import com.test.batch.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +25,7 @@ public class NotificationWriter implements ItemWriter<DeviceTokenOwner> {
     private final NotificationRepository notificationRepository;
 
     @Override
+    @StepScope
     @Transactional
     public void write(@NonNull Chunk<? extends DeviceTokenOwner> owners) throws Exception {
         log.info("Writer 실행: {}", owners.size());
