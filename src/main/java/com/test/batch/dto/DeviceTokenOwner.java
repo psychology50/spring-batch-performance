@@ -5,6 +5,7 @@ package com.test.batch.dto;
  */
 public record DeviceTokenOwner(
         Long userId,
+        Long deviceTokenId,
         String name,
         String deviceToken
 ) {
