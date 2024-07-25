@@ -12,6 +12,8 @@ public class QuerydslNoOffsetStringOptions<T> extends QuerydslNoOffsetOptions<T>
     private String currentId;
     private String lastId;
 
+    private JPAQuery<T> idSelectQuery;
+
     public QuerydslNoOffsetStringOptions(@Nonnull StringPath field,
                                          @Nonnull Expression expression) {
         super(field, expression);
@@ -34,8 +36,14 @@ public class QuerydslNoOffsetStringOptions<T> extends QuerydslNoOffsetOptions<T>
     }
 
     @Override
+    public void setIdSelectQuery(JPAQuery<T> idSelectQuery) {
+        this.idSelectQuery = idSelectQuery;
+    }
+
+    @Override
     public void initKeys(JPAQuery<T> query, int page) {
         if (page == 0) {
+            query = (idSelectQuery != null) ? idSelectQuery.clone() : query.clone();
             initFirstId(query);
             initLastId(query);
 

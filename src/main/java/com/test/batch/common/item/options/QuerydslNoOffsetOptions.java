@@ -37,6 +37,13 @@ public abstract class QuerydslNoOffsetOptions<T> {
         return fieldName;
     }
 
+    /**
+     * currentId와 lastId를 초기화하기 위한 JPAQuery를 설정한다.
+     * <p>
+     * idSelectQuery가 null이면 내부적으로 currentId와 lastId를 초기화한다.
+     */
+    public abstract void setIdSelectQuery(JPAQuery<T> idSelectQuery);
+
     public abstract void initKeys(JPAQuery<T> query, int page);
 
     protected abstract void initFirstId(JPAQuery<T> query);

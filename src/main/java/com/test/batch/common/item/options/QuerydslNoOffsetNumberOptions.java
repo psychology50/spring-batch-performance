@@ -13,6 +13,8 @@ public class QuerydslNoOffsetNumberOptions<T, N extends Number & Comparable<?>> 
     private N currentId;
     private N lastId;
 
+    private JPAQuery<T> idSelectQuery;
+
     public QuerydslNoOffsetNumberOptions(@Nonnull NumberPath<N> field,
                                          @Nonnull Expression expression) {
         super(field, expression);
@@ -35,8 +37,14 @@ public class QuerydslNoOffsetNumberOptions<T, N extends Number & Comparable<?>> 
     }
 
     @Override
+    public void setIdSelectQuery(JPAQuery<T> idSelectQuery) {
+        this.idSelectQuery = idSelectQuery;
+    }
+
+    @Override
     public void initKeys(JPAQuery<T> query, int page) {
         if (page == 0) {
+            query = (idSelectQuery != null) ? idSelectQuery.clone() : query.clone();
             initFirstId(query);
             initLastId(query);
 
@@ -94,7 +102,7 @@ public class QuerydslNoOffsetNumberOptions<T, N extends Number & Comparable<?>> 
 
     private BooleanExpression whereExpression(int page) {
         return expression.where(field, page, currentId)
-                .and(expression.isAsc() ? field.loe(lastId) : field.goe(lastId));
+                .and(expression.isAsc() ? field.loe(lastId) : field.goe(lastId)); // last id보다 작거나 같은 범위
     }
 
     private OrderSpecifier<N> orderExpression() {
