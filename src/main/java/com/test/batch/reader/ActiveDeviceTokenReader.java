@@ -1,5 +1,6 @@
 package com.test.batch.reader;
 
+import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.test.batch.common.item.QuerydslNoOffsetPagingItemReader;
@@ -73,6 +74,7 @@ public class ActiveDeviceTokenReader {
                     .fetchSize(100)
                     .rowMapper((rs, rowNum) -> new DeviceTokenOwner(
                             rs.getLong("id"),
+                            rs.getLong("deviceTokenId"),
                             rs.getString("name"),
                             rs.getString("token")
                     ))
@@ -128,6 +130,7 @@ public class ActiveDeviceTokenReader {
 //                .beanRowMapper(DeviceTokenOwner.class)
                 .rowMapper((rs, rowNum) -> new DeviceTokenOwner(
                         rs.getLong("id"),
+                        rs.getLong("deviceTokenId"),
                         rs.getString("name"),
                         rs.getString("token")
                 ))
@@ -138,20 +141,24 @@ public class ActiveDeviceTokenReader {
     @Bean
     @StepScope
     public QuerydslNoOffsetPagingItemReader<DeviceTokenOwner> querydslNoOffsetPagingItemReader() {
-        QuerydslNoOffsetOptions<DeviceTokenOwner> options = new QuerydslNoOffsetNumberOptions<>(user.id, Expression.ASC, "userId");
+        QuerydslNoOffsetOptions<DeviceTokenOwner> options = new QuerydslNoOffsetNumberOptions<>(deviceToken.id, Expression.ASC, "deviceTokenId");
+        options.setIdSelectQuery(queryFactory.select(createConstructorExpression()).from(deviceToken));
 
         return new QuerydslNoOffsetPagingItemReader<>(emf, 1000, options, queryFactory -> queryFactory
-                .select(
-                        Projections.constructor(
-                                DeviceTokenOwner.class,
-                                user.id,
-                                user.name,
-                                deviceToken.token
-                        )
-                )
+                .select(createConstructorExpression())
                 .from(deviceToken)
                 .innerJoin(user).on(deviceToken.user.id.eq(user.id))
                 .where(deviceToken.activated.isTrue().and(user.notifySetting.accountBookNotify.isTrue()))
+        );
+    }
+
+    private ConstructorExpression<DeviceTokenOwner> createConstructorExpression() {
+        return Projections.constructor(
+                DeviceTokenOwner.class,
+                user.id,
+                deviceToken.id,
+                user.name,
+                deviceToken.token
         );
     }
 }
