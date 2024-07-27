@@ -5,8 +5,8 @@ import com.test.batch.repository.UserRepository;
 import com.test.batch.supporter.BigDataCreator;
 import com.test.batch.supporter.DataCreator;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.batch.core.ExitStatus;
@@ -56,11 +56,10 @@ public class BatchPerformanceTest {
         jobRepositoryTestUtils.removeJobExecutions();
     }
 
-    @Test
     @ParameterizedTest
-    @ValueSource(ints = {100_000_000})
-    void testJobPerformance1(int dataSize) throws Exception {
-//        insertData(dataSize);
+    @ValueSource(ints = {1000, 10000, 100000})
+    void testJobPerformance(int dataSize) throws Exception {
+        insertData(dataSize);
 //        bigDataCreator.insertUserData(dataSize);
 
         StopWatch stopWatch = new StopWatch();
@@ -76,12 +75,12 @@ public class BatchPerformanceTest {
         log.info("Write count: {}", jobExecution.getStepExecutions().stream().mapToLong(StepExecution::getWriteCount).sum());
     }
 
-//    @AfterEach
-//    void tearDown() {
-//        dataCreator.bulkDeleteDeviceToken();
-//        dataCreator.bulkDeleteNotifications();
-//        dataCreator.bulkDeleteUser();
-//    }
+    @AfterEach
+    void tearDown() {
+        dataCreator.bulkDeleteDeviceToken();
+        dataCreator.bulkDeleteNotifications();
+        dataCreator.bulkDeleteUser();
+    }
 
     private void insertData(int dataSize) {
         int userCount = dataSize, deviceTokenCount = userCount * 10; // 사용자 수, 디바이스 토큰 수(사용자수 10배)

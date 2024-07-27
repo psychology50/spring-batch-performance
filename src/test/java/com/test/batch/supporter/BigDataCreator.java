@@ -13,7 +13,7 @@ public class BigDataCreator {
             + "VALUES (NULL, ?, ?, true, true, true, NOW(), NOW(), NULL);";
     private static final String INSERT_DEVICE_TOKEN = "INSERT INTO device_token (id, token, activated, created_at, updated_at, user_id) "
             + "VALUES (NULL, ?, true, NOW(), NOW(), ?);";
-    private static final int BATCH_SIZE = 50000;
+    private static final int BATCH_SIZE = 1000000;
 
     private final JdbcTemplate jdbcTemplate;
 
