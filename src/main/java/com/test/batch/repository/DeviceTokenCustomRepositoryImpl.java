@@ -31,6 +31,7 @@ public class DeviceTokenCustomRepositoryImpl implements DeviceTokenCustomReposit
                         Projections.constructor(
                                 DeviceTokenOwner.class,
                                 user.id,
+                                deviceToken.id,
                                 user.name,
                                 deviceToken.token
                         )
