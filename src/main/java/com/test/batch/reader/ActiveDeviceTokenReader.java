@@ -59,10 +59,23 @@ public class ActiveDeviceTokenReader {
 
     @Bean
     @StepScope
+    public RepositoryItemTestReader<DeviceTokenOwner> executeTestVersion() {
+        RepositoryItemTestReader<DeviceTokenOwner> reader = new RepositoryItemTestReader<>();
+        reader.setRepository(deviceTokenRepository);
+        reader.setMethodName("findActivatedDeviceTokenOwners");
+        reader.setPageSize(1000);
+        reader.setSort(new HashMap<>() {{
+            put("id", Sort.Direction.ASC);
+        }});
+        return reader;
+    }
+
+    @Bean
+    @StepScope
     public JdbcPagingItemReader<DeviceTokenOwner> jdbcPagingItemReader(DataSource dataSource) {
         SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
         factoryBean.setDataSource(dataSource);
-        factoryBean.setSelectClause("SELECT u.id, u.name, dt.token");
+        factoryBean.setSelectClause("SELECT u.id, u.name, dt.token, dt.id AS deviceTokenId");
         factoryBean.setFromClause("FROM device_token dt LEFT JOIN user u ON dt.user_id = u.id");
         factoryBean.setWhereClause("WHERE dt.activated = true AND u.account_book_notify = true");
         factoryBean.setSortKey("u.id");
