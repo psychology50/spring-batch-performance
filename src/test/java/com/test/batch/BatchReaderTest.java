@@ -70,6 +70,7 @@ class BatchReaderTest {
         testItemReader(itemReader, "JdbcCursorItemReader");
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("JdbcPagingItemReader 테스트")
@@ -97,7 +98,6 @@ class BatchReaderTest {
         testItemReader(itemReader, "JpaPagingItemReader");
     }
 
-    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("RepositoryItemReader 테스트")
