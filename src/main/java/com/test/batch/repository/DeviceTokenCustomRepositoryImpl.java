@@ -1,6 +1,8 @@
 package com.test.batch.repository;
 
+import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.test.batch.domain.QDeviceToken;
 import com.test.batch.domain.QUser;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Repository
@@ -22,6 +25,7 @@ public class DeviceTokenCustomRepositoryImpl implements DeviceTokenCustomReposit
 
     private final QUser user = QUser.user;
     private final QDeviceToken deviceToken = QDeviceToken.deviceToken;
+    private final AtomicLong lastProcessedId = new AtomicLong(0);
 
     public static <T> Slice<T> toSlice(List<T> contents, Pageable pageable) {
         boolean hasNext = isContentSizeGreaterThanPageSize(contents, pageable);
@@ -38,24 +42,41 @@ public class DeviceTokenCustomRepositoryImpl implements DeviceTokenCustomReposit
 
     @Override
     public Slice<DeviceTokenOwner> findActivatedDeviceTokenOwners(Pageable pageable) {
+        ConstructorExpression<DeviceTokenOwner> constructorExpression = Projections.constructor(
+                DeviceTokenOwner.class,
+                user.id,
+                deviceToken.id,
+                user.name,
+                deviceToken.token
+        );
+
+        BooleanExpression whereCondition = deviceToken.activated.isTrue()
+                .and(user.notifySetting.accountBookNotify.isTrue());
+
+        if (lastProcessedId.get() > 0) {
+            log.info("lastProcessedId: {}", lastProcessedId.get());
+            whereCondition = whereCondition.and(deviceToken.id.gt(lastProcessedId.get()));
+        }
+
         List<DeviceTokenOwner> content = queryFactory
-                .select(
-                        Projections.constructor(
-                                DeviceTokenOwner.class,
-                                user.id,
-                                deviceToken.id,
-                                user.name,
-                                deviceToken.token
-                        )
-                )
+                .select(constructorExpression)
                 .from(deviceToken)
                 .innerJoin(user).on(deviceToken.user.id.eq(user.id))
-                .where(deviceToken.activated.isTrue().and(user.notifySetting.accountBookNotify.isTrue()))
-                .offset(pageable.getOffset())
+                .where(whereCondition)
                 .limit(pageable.getPageSize())
                 .orderBy(deviceToken.id.asc())
                 .fetch();
 
+        if (!content.isEmpty()) {
+            lastProcessedId.set(content.get(content.size() - 1).deviceTokenId());
+            log.info("updated lastProcessedId: {}", lastProcessedId.get());
+        }
+
         return toSlice(content, pageable);
+    }
+
+    public void resetLastProcessedId() {
+        log.info("Resetting last processed ID from {} to 0", lastProcessedId);
+        lastProcessedId.set(0);
     }
 }
