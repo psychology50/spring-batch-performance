@@ -49,11 +49,11 @@ public class DeviceTokenCustomRepositoryImpl implements DeviceTokenCustomReposit
                         )
                 )
                 .from(deviceToken)
-                .leftJoin(user).on(deviceToken.user.id.eq(user.id))
+                .innerJoin(user).on(deviceToken.user.id.eq(user.id))
                 .where(deviceToken.activated.isTrue().and(user.notifySetting.accountBookNotify.isTrue()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(user.id.asc())
+                .orderBy(deviceToken.id.asc())
                 .fetch();
 
         return toSlice(content, pageable);
