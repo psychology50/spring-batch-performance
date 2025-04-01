@@ -78,13 +78,13 @@ public class ActiveDeviceTokenReader {
         factoryBean.setSelectClause("SELECT u.id, u.name, dt.token, dt.id AS deviceTokenId");
         factoryBean.setFromClause("FROM device_token dt LEFT JOIN user u ON dt.user_id = u.id");
         factoryBean.setWhereClause("WHERE dt.activated = true AND u.account_book_notify = true");
-        factoryBean.setSortKey("u.id");
+        factoryBean.setSortKey("dt.id");
 
         try {
             return new JdbcPagingItemReaderBuilder<DeviceTokenOwner>()
                     .name("jdbcPagingItemReader")
                     .dataSource(dataSource)
-                    .fetchSize(100)
+                    .fetchSize(1000)
                     .rowMapper((rs, rowNum) -> new DeviceTokenOwner(
                             rs.getLong("id"),
                             rs.getLong("deviceTokenId"),
