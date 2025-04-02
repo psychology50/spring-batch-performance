@@ -75,7 +75,7 @@ public class ActiveDeviceTokenReader {
     public JdbcPagingItemReader<DeviceTokenOwner> jdbcPagingItemReader(DataSource dataSource) {
         SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
         factoryBean.setDataSource(dataSource);
-        factoryBean.setSelectClause("SELECT u.id, u.name, dt.token, dt.id AS deviceTokenId");
+        factoryBean.setSelectClause("SELECT u.id, u.name, dt.token, dt.id");
         factoryBean.setFromClause("FROM device_token dt LEFT JOIN user u ON dt.user_id = u.id");
         factoryBean.setWhereClause("WHERE dt.activated = true AND u.account_book_notify = true");
         factoryBean.setSortKey("dt.id");
@@ -86,13 +86,13 @@ public class ActiveDeviceTokenReader {
                     .dataSource(dataSource)
                     .fetchSize(1000)
                     .rowMapper((rs, rowNum) -> new DeviceTokenOwner(
-                            rs.getLong("id"),
-                            rs.getLong("deviceTokenId"),
-                            rs.getString("name"),
-                            rs.getString("token")
+                            rs.getLong("u.id"),
+                            rs.getLong("dt.id"),
+                            rs.getString("u.name"),
+                            rs.getString("dt.token")
                     ))
                     .queryProvider(factoryBean.getObject())
-                    .pageSize(100)
+                    .pageSize(1000)
                     .build();
         } catch (Exception e) {
             log.error("Error creating jdbcPagingItemReader", e);

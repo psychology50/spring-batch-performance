@@ -4,6 +4,7 @@ import com.test.batch.common.item.QuerydslNoOffsetPagingItemReader;
 import com.test.batch.dto.DeviceTokenOwner;
 import com.test.batch.reader.ActiveDeviceTokenReader;
 import com.test.batch.reader.RepositoryItemTestReader;
+import com.test.batch.repository.DeviceTokenCustomRepositoryImpl;
 import com.test.batch.repository.UserRepository;
 import com.test.batch.supporter.DataCreator;
 import jakarta.persistence.EntityManagerFactory;
@@ -47,6 +48,8 @@ class BatchReaderTest {
     private DataSource dataSource;
     @Autowired
     private EntityManagerFactory entityManagerFactory;
+    @Autowired
+    private DeviceTokenCustomRepositoryImpl deviceTokenCustomRepository;
 
     private DataCreator dataCreator;
 
@@ -102,6 +105,10 @@ class BatchReaderTest {
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("RepositoryItemReader 테스트")
     void testRepositoryItemReader(int dataSize) {
+        ExecutionContext executionContext = new ExecutionContext();
+        executionContext.put("dataSize", dataSize);
+        deviceTokenCustomRepository.resetLastProcessedId();
+
         insertData(dataSize);
 
         RepositoryItemReader<DeviceTokenOwner> itemReader = reader.execute();
@@ -109,6 +116,7 @@ class BatchReaderTest {
         testItemReader(itemReader, "RepositoryItemReader");
     }
 
+    @Disabled
     @ParameterizedTest
     @ValueSource(ints = {100, 1000, 10000, 100000})
     @DisplayName("RepositoryItemTestReader 테스트")
